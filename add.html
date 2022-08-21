@@ -13,7 +13,7 @@
 </head>
 <body>
 	<div id="app">
-		<van-form @submit="onSubmit">
+		<van-form @submit="onSubmit" enctype="multipart/form-data">
 			<van-cell-group inset>
 				<van-field
 					v-model="studentInfo.stu_name"
@@ -74,10 +74,6 @@
 		<van-calendar v-model:show="showCalendar" @confirm="onConfirm" :min-date="minDate" :max-date="maxDate"/>
 	</div>
 
-	<form action="/api/upload.php" method="post" enctype="multipart/form-data">
-		<input type="file" name="file">
-		<input type="submit" name="tj">
-	</form>
 </body>
 </html>
 <script>
@@ -103,26 +99,24 @@
 				state.studentInfo.rx_time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 			};
 			const afterRead = (file) => {
-				console.log(file.file)
 				let url = '/api/upload.php';
-                let data = new FormData();
-        		// data.append('file', file)
-        		data.append('file', file.file)
-        		// data.append('file', file.content)
-				console.log(data);
-				$.ajaxSetup({
-			        headers:{
-			            'content-type': 'multipart/form-data',
-			        }
-			    });
+                let data  = new FormData();
+        		data.append('photo', file.file)
                 $.ajax({
 				    url: url,
 				    type: 'post',
 				    processData: false,  // 增加这一行，不处理参数
-				    // contentType: false,
-				    data: data,
-				    success: function (result) {
-				      	console.log(result)
+				    contentType: false,
+				    data: data ,
+				    success: function (res) {
+				      	let ret = JSON.parse(res);
+	                    if(ret.status == 1){
+	                    	state.studentInfo.img = ret.data.info;
+	                    	Toast.success(ret.msg);
+	                    }else{
+	                    	state.studentInfo.img = '';
+	                    	Toast.fail(ret.msg);
+	                    }
 				    }
 				});
 			}
@@ -130,26 +124,6 @@
             onMounted(() => {
                 // onSearch();
 		    });
-
-			//将base64转换为blob文件流
-			function dataURLtoBlob(dataurl) {
-			  let arr = dataurl.split(',')
-			  let mime = arr[0].match(/:(.*?);/)[1]
-			  let bstr = window.atob(arr[1])
-			  let n = bstr.length
-			  let u8arr = new Uint8Array(n)
-			  console.log(mime, "mime")
-			  while (n--) {
-			    u8arr[n] = bstr.charCodeAt(n);
-			  }
-			  return new Blob([u8arr], { type: mime });
-			}
-			//再将blob转换为file
-			function blobToFile(theBlob, fileName) {
-			  theBlob.lastModifiedDate = new Date();
-			  theBlob.name = fileName;
-			  return theBlob;
-			}
 
             const onSubmit = () => {
                 let url = '/api/add.php';

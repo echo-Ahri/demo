@@ -44,32 +44,32 @@ class Uploads
  
 		// 没有设置上传路径
 		if(!$this->path){
-			return $this->outMessage('文件路径没有设置');
+			return $this->outMessage(['status' => 0, 'msg' => '文件路径没有设置']);
 		}
  
 		if(!$this->checkPath()){
-			return $this->outMessage('文件路径不是目录或者不可写');
+			return $this->outMessage(['status' => 0, 'msg' => '文件路径不是目录或者不可写']);
 		}
  
 		if(!$this->getUploadFile()){
-			return $this->outMessage('获取上传文件源错误');
+			return $this->outMessage(['status' => 0, 'msg' => '获取上传文件源错误']);
 		}
  
 		if(!$this->checkSize()){
-			return $this->outMessage('文件超过指定大小');
+			return $this->outMessage(['status' => 0, 'msg' => '文件超过指定大小']);
 		}
  
 		if(!$this->checkExt()){
-			return $this->outMessage('文件后缀不符合');
+			return $this->outMessage(['status' => 0, 'msg' => '文件后缀不符合']);
 		}
  
 		if(!$this->checkMime()){
-			return $this->outMessage('文件类型不符合');
+			return $this->outMessage(['status' => 0, 'msg' => '文件类型不符合']);
 		}
  
 		// 是否通过http post 上传的
 		if(!is_uploaded_file($this->upload_file_array['tmp_name'])){
-			return $this->outMessage('不是通过指定的HTTP POST 方式上传');
+			return $this->outMessage(['status' => 0, 'msg' => '不是通过指定的HTTP POST 方式上传']);
 		}
  
 		$this->new_file_name = $this->createNewFileName();
@@ -78,7 +78,7 @@ class Uploads
 		$is_move_succ = move_uploaded_file($this->upload_file_array['tmp_name'], $this->path.$this->new_file_name);
  
 		if(!$is_move_succ){
-			return $this->outMessage('移动文件失败，上传失败');
+			return $this->outMessage(['status' => 0, 'msg' => '移动文件失败，上传失败']);
 		}
  
 		// 上传成功拼接路径
@@ -93,7 +93,7 @@ class Uploads
 			'title' => $this->upload_file_array['name'],
 		);
  
-		return $this->outMessage('上传成功', true, $result);
+		return $this->outMessage(['status' => 1, 'msg' => '上传成功', 'data' => $result]);
  
 	}
  
