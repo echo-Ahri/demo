@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-cn" data-dpr="2" style="font-size: 75px;" class="ui-mobile">
+<head>
+  	<meta charset="utf-8">
+  	<title>详情</title>
+	<meta name="viewport" content="width=750,user-scalable=no,target-densitydpi=device-dpi,minimal-ui">
+	<link rel="stylesheet" href="./css/vant3.index.css"/>
+	<link rel="stylesheet" href="./css/common.css"/>
+
+	<script src="./js/vue3.js"></script>
+	<script src="./js/vant3.js"></script>
+</head>
+<body>
+	<div id="app">
+        圖片信息
+        <van-grid :border="false" :column-num="4" :gutter="10" direction="horizontal">
+            <van-grid-item>
+                <van-image
+                    round
+                    width="1rem"
+                    height="1rem"
+                    src="./Ahri.jpg"
+                />
+            </van-grid-item>
+            <van-grid-item>
+                <van-image
+                    round
+                    width="1rem"
+                    height="1rem"
+                    src="./Ahri.jpg"
+                />
+            </van-grid-item>
+            <van-grid-item>
+                <van-image
+                    round
+                    width="1rem"
+                    height="1rem"
+                    src="./Ahri.jpg"
+                />
+            </van-grid-item>
+            <van-grid-item>
+                <van-image
+                    round
+                    width="1rem"
+                    height="1rem"
+                    src="./Ahri.jpg"
+                />
+            </van-grid-item>
+            <van-grid-item>
+                <van-image
+                    round
+                    width="1rem"
+                    height="1rem"
+                    src="./Ahri.jpg"
+                />
+            </van-grid-item>
+        </van-grid>
+        
+	</div>
+</body>
+</html>
+<script>
+    const HelloVueApp = {
+        setup() {
+            const { reactive, toRefs, ref, onMounted } = Vue;
+            const { Toast } = vant;
+            const state = reactive({
+                username: '',
+                showCalendar: false,
+                img: [],
+				rx_time: '',
+				minDate: new Date(2020, 0, 1),
+				maxDate: new Date(),
+	  		});
+			const onConfirm = (date) => {
+				state.showCalendar = false;
+				// console.log(date);
+				state.rx_time = `${date.getFullYear()} - ${date.getMonth() + 1} - ${date.getDate()}`;
+			};
+
+            onMounted(() => {
+                // onSearch();
+		    });
+            const jump_url = () => {
+                window.location.href='add.html';
+            }
+            const onSubmit = () => {
+                window.location.href='add.html';
+            }
+            return {
+                ...toRefs(state),
+                jump_url,
+				onConfirm,
+				onSubmit
+            };
+        }
+    }
+    Vue.createApp(HelloVueApp).use(vant).mount('#app');
+</script>

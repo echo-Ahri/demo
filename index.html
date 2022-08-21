@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-cn" data-dpr="2" style="font-size: 75px;" class="ui-mobile">
+<head>
+  	<meta charset="utf-8">
+  	<title>搜索</title>
+	<meta name="viewport" content="width=750,user-scalable=no,target-densitydpi=device-dpi,minimal-ui">
+	<link rel="stylesheet" href="./css/vant3.index.css"/>
+	<link rel="stylesheet" href="./css/common.css"/>
+
+	<script src="./js/vue3.js"></script>
+	<script src="./js/vant3.js"></script>
+</head>
+<body>
+	<div id="app">
+        <div class="search_div">
+            <van-search v-model="searchValue" placeholder="请输入搜索关键词" 
+            @search="onSearch"
+            @cancel="onCancel"
+            />
+        </div>
+        <div class="data_div">
+            <van-list
+                v-model:loading="loading"
+                :finished="finished"
+                finished-text="没有更多了"
+                @load="onSearch"
+                >
+                <van-collapse v-model="activeNames" accordion>
+                    <van-collapse-item v-for="item in list" :key="item" :name="item">
+                        <template #title>
+                            <div class="list_tr">
+                                <div class="img">
+                                    <img src="./Ahri.jpg" alt="">
+                                </div>
+                                <div class="stu_name">
+                                    姓名 {{ item }}
+                                </div>
+                                <div class="stu_jz">
+                                    姓名
+                                </div>
+                                <div class="rx_time">
+                                    2022年8月17日18:52:13
+                                </div>
+                            </div>
+                        </template>
+                        <div class="type_box">
+                            <van-button icon="photo" type="primary" size="small" color="pink">
+                                图片
+                            </van-button>
+                            <van-button icon="video" type="primary" size="small" color="pink">
+                                视频
+                            </van-button>
+                            <van-button icon="column" type="primary" size="small" color="pink">
+                                文件
+                            </van-button>
+                            <van-button icon="friends" type="primary" size="small" color="pink">
+                                详情
+                            </van-button>
+                        </div>
+                    </van-collapse-item>
+                </van-collapse>
+            </van-list>
+        </div>
+        <van-button round class="add_button" icon="plus" type="primary" @click="jump_url()"/>
+    </div>
+</body>
+</html>
+<script>
+    const HelloVueApp = {
+        setup() {
+            const { reactive, toRefs, ref, onMounted } = Vue;
+            const { Toast } = vant;
+            const state = reactive({
+                searchValue: '',
+                loading: false,
+                finished: false,
+	  			list: [],
+                activeNames: [1]
+	  		});
+
+            onMounted(() => {
+                // onSearch();
+		    });
+            const jump_url = () => {
+                window.location.href='add.html';
+            }
+            const onSearch = () => {
+                setTimeout(() => {
+                    let list = state.list;
+                    for (let i = 0; i < 10; i++) {
+                        list.push(list.length + 1);
+                    }
+                    state.loading = false;
+                    if (list.length >= 10) {
+                        state.finished = true;
+                    }
+                }, 1000);
+                let url = '';
+                let data = {keyword: state.searchValue};
+                // Toast.success('成功文案');
+                // Toast.fail('失败文案');
+                console.log(data);return
+                $.post(url, data, function (res) {
+                    let ret = jsonDecode(res);
+                    if(ret.status == 1){
+                        _this.$message.success(ret.message);
+                    }else{
+                        _this.$message.error(ret.message);
+                    }
+                });
+            }
+            const onCancel = () => {
+                state.searchValue = '';
+            }
+            return {
+                ...toRefs(state),
+                onSearch,
+                onCancel,
+                jump_url
+            };
+        }
+    }
+    Vue.createApp(HelloVueApp).use(vant).mount('#app');
+</script>
+<style>
+    .add_button{
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+    }
+    .list_tr{
+        display: flex;
+        justify-content: space-around;
+        height: 50px;
+        line-height: 50px;
+        align-items: center;
+    }
+    .type_box{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+    .img,img{
+        height: 30px;
+        width: 30px;
+        border-radius: 15px;
+    }
+    /* .van-search .van-search__content{
+        height: 50px;
+    } */
+</style>
