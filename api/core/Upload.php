@@ -1,10 +1,9 @@
 <?php
 /**
- * @Author: zm.wu
  * 上传类
  * 只需要实例化后调用uploadFile()方法
  */
-namespace app\common;
+namespace uploads;
  
 class Uploads
 {
@@ -25,8 +24,11 @@ class Uploads
 	/**
 	 * __construct 构造函数
 	 */
-	public function __construct()
+	public function __construct($config = [])
 	{
+		if(isset($config['path']) && $config['path'] != ''){
+			$this->path = $config['path'];
+		}
 		if($this->path){
 			// 自动加上日期如20211224/文件夹
 			$this->path = $this->path.date('Ymd', time()).'/';

@@ -9,22 +9,30 @@
 
 	<script src="./js/vue3.js"></script>
 	<script src="./js/vant3.js"></script>
+	<script src="./js/jquery.min.js"></script>
 </head>
 <body>
 	<div id="app">
 		<van-form @submit="onSubmit">
 			<van-cell-group inset>
 				<van-field
-					v-model="stu_name"
-					name="用户名"
-					label="用户名"
-					placeholder="用户名"
+					v-model="studentInfo.stu_name"
+					name="学生姓名"
+					label="学生姓名"
+					placeholder="学生姓名"
 					:rules="[{ required: true, message: '请填写用户名' }]"
 				/>
 			</van-cell-group>
 			<van-cell-group inset>
+				<van-field name="uploader" label="头像">
+					<template #input>
+						<van-uploader v-model="studentInfo.img" :after-read="afterRead" multiple :max-count="1"/>
+					</template>
+				</van-field>
+			</van-cell-group>
+			<van-cell-group inset>
 				<van-field
-					v-model="stu_class"
+					v-model="studentInfo.stu_class"
 					name="班级"
 					label="班级"
 					placeholder="班级"
@@ -33,7 +41,7 @@
 			</van-cell-group>
 			<van-cell-group inset>
 				<van-field
-					v-model="stu_jz"
+					v-model="studentInfo.stu_jz"
 					name="家长姓名"
 					label="家长姓名"
 					placeholder="家长姓名"
@@ -41,15 +49,8 @@
 				/>
 			</van-cell-group>
 			<van-cell-group inset>
-				<van-field name="uploader" label="文件上传">
-					<template #input>
-						<van-uploader v-model="img" />
-					</template>
-				</van-field>
-			</van-cell-group>
-			<van-cell-group inset>
 				<van-field
-					v-model="rx_time"
+					v-model="studentInfo.rx_time"
 					is-link
 					readonly
 					name="calendar"
@@ -58,12 +59,25 @@
 					@click="showCalendar = true"
 				/>
 			</van-cell-group>
+			<van-cell-group inset>
+				<van-field
+					v-model="studentInfo.remark"
+					name="备注"
+					label="备注"
+					placeholder="备注"
+				/>
+			</van-cell-group>
 			<div style="margin: 16px;">
 				<van-button round block type="primary" native-type="submit">提交</van-button>
 			</div>
 		</van-form>
 		<van-calendar v-model:show="showCalendar" @confirm="onConfirm" :min-date="minDate" :max-date="maxDate"/>
 	</div>
+
+	<form action="/api/upload.php" method="post" enctype="multipart/form-data">
+		<input type="file" name="file">
+		<input type="submit" name="tj">
+	</form>
 </body>
 </html>
 <script>
@@ -72,32 +86,92 @@
             const { reactive, toRefs, ref, onMounted } = Vue;
             const { Toast } = vant;
             const state = reactive({
-                username: '',
+                studentInfo: {
+                	stu_name: '',
+                	stu_class: '',
+                	stu_jz: '',
+                	rx_time: '',
+					remark: '',
+                },
                 showCalendar: false,
-                img: [],
-				rx_time: '',
+
 				minDate: new Date(2020, 0, 1),
 				maxDate: new Date(),
 	  		});
 			const onConfirm = (date) => {
 				state.showCalendar = false;
-				// console.log(date);
-				state.rx_time = `${date.getFullYear()} - ${date.getMonth() + 1} - ${date.getDate()}`;
+				state.studentInfo.rx_time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 			};
+			const afterRead = (file) => {
+				console.log(file.file)
+				let url = '/api/upload.php';
+                let data = new FormData();
+        		// data.append('file', file)
+        		data.append('file', file.file)
+        		// data.append('file', file.content)
+				console.log(data);
+				$.ajaxSetup({
+			        headers:{
+			            'content-type': 'multipart/form-data',
+			        }
+			    });
+                $.ajax({
+				    url: url,
+				    type: 'post',
+				    processData: false,  // 增加这一行，不处理参数
+				    // contentType: false,
+				    data: data,
+				    success: function (result) {
+				      	console.log(result)
+				    }
+				});
+			}
 
             onMounted(() => {
                 // onSearch();
 		    });
-            const jump_url = () => {
-                window.location.href='add.html';
-            }
+
+			//将base64转换为blob文件流
+			function dataURLtoBlob(dataurl) {
+			  let arr = dataurl.split(',')
+			  let mime = arr[0].match(/:(.*?);/)[1]
+			  let bstr = window.atob(arr[1])
+			  let n = bstr.length
+			  let u8arr = new Uint8Array(n)
+			  console.log(mime, "mime")
+			  while (n--) {
+			    u8arr[n] = bstr.charCodeAt(n);
+			  }
+			  return new Blob([u8arr], { type: mime });
+			}
+			//再将blob转换为file
+			function blobToFile(theBlob, fileName) {
+			  theBlob.lastModifiedDate = new Date();
+			  theBlob.name = fileName;
+			  return theBlob;
+			}
+
             const onSubmit = () => {
-                window.location.href='add.html';
+                let url = '/api/add.php';
+                let data = state.studentInfo;
+                $.ajax({
+				    url: url,
+				    type: 'POST',
+				    data: data,
+				    success: function (res) {
+				      	let ret = JSON.parse(res);
+	                    if(ret.status == 1){
+	                    	Toast.success(ret.msg);
+	                    }else{
+	                    	Toast.fail(ret.msg);
+	                    }
+				    }
+				});
             }
             return {
                 ...toRefs(state),
-                jump_url,
 				onConfirm,
+				afterRead,
 				onSubmit
             };
         }
